@@ -182,3 +182,50 @@
     border-right-color: var(--border);
   }
 }
+
+.site-header {
+  background-color: #1a2b4c;
+  color: white;
+  padding: 1.5rem 2rem;
+  text-align: center;
+}
+
+.site-header h1 {
+  color: rgb(152, 230, 230);
+  margin: 0 0 0.25rem 0;
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.site-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #cfd8ea;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background-color: #f4f5f7;
+  color: #222;
+}
+
+button {
+  background-color: #1a2b4c;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background-color: #14213d;
+}
+
+.filters select:focus,
+.filters input:focus {
+  outline: none;
+  border-color: #1a2b4c;
+}

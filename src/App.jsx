@@ -5,15 +5,15 @@ import "./App.css";
 
 function App() {
   const [filters, setFilters] = useState({
-  make: "",
-  fuelType: "",
-  bodyType: "",
-  gearboxType: "",
-  minPrice: "",
-  maxPrice: "",
-  minYear: "",
-  maxYear: "",
-});
+    make: "",
+    fuelType: "",
+    bodyType: "",
+    gearboxType: "",
+    minPrice: "",
+    maxPrice: "",
+    minYear: "",
+    maxYear: "",
+  });
 
   const filteredCars = dummyCars.filter(car =>
     (filters.make === "" || car.make === filters.make) &&
@@ -28,6 +28,10 @@ function App() {
 
   return (
     <div>
+      <header className="site-header">
+        <h1>CarFinder</h1>
+        <p>Find your next car, quickly and simply</p>
+      </header>
       <div className="filters">
         {<div className="filters">
           <select value={filters.make} onChange={(e) => setFilters({ ...filters, make: e.target.value })}>
@@ -64,32 +68,32 @@ function App() {
           </select>
 
           <input
-          type="number"
-          placeholder="Min Price"
-          value={filters.minPrice}
-          onChange={(e) => setFilters({...filters, minPrice:e.target.value})}
-          onWheel={(e) => e.target.blur()}
+            type="number"
+            placeholder="Min Price"
+            value={filters.minPrice}
+            onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+            onWheel={(e) => e.target.blur()}
           />
           <input
-          type="number"
-          placeholder="Max Price"
-          value={filters.maxPrice}
-          onChange={(e) => setFilters({...filters, maxPrice:e.target.value})}
-          onWheel={(e) => e.target.blur()}
+            type="number"
+            placeholder="Max Price"
+            value={filters.maxPrice}
+            onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+            onWheel={(e) => e.target.blur()}
           />
           <input
-          type="number"
-          placeholder="Min Year"
-          value={filters.minYear}
-          onChange={(e) => setFilters({...filters, minYear: e.target.value})}
-          onWheel={(e) => e.target.blur()}
+            type="number"
+            placeholder="Min Year"
+            value={filters.minYear}
+            onChange={(e) => setFilters({ ...filters, minYear: e.target.value })}
+            onWheel={(e) => e.target.blur()}
           />
           <input
-          type="number"
-          placeholder="Max Year"
-          value={filters.maxYear}
-          onChange={(e) => setFilters({...filters, maxYear: e.target.value})}
-          onWheel={(e) => e.target.blur()}
+            type="number"
+            placeholder="Max Year"
+            value={filters.maxYear}
+            onChange={(e) => setFilters({ ...filters, maxYear: e.target.value })}
+            onWheel={(e) => e.target.blur()}
           />
         </div>}
       </div>
