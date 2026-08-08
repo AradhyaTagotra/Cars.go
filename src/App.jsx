@@ -5,17 +5,25 @@ import "./App.css";
 
 function App() {
   const [filters, setFilters] = useState({
-    make: "",
-    fuelType: "",
-    bodyType: "",
-    gearboxType: "",
-  });
+  make: "",
+  fuelType: "",
+  bodyType: "",
+  gearboxType: "",
+  minPrice: "",
+  maxPrice: "",
+  minYear: "",
+  maxYear: "",
+});
 
   const filteredCars = dummyCars.filter(car =>
     (filters.make === "" || car.make === filters.make) &&
     (filters.fuelType === "" || car.fuelType === filters.fuelType) &&
     (filters.bodyType === "" || car.bodyType === filters.bodyType) &&
-    (filters.gearboxType === "" || car.gearboxType === filters.gearboxType)
+    (filters.gearboxType === "" || car.gearboxType === filters.gearboxType) &&
+    (filters.minPrice === "" || car.price >= Number(filters.minPrice)) &&
+    (filters.maxPrice === "" || car.price <= Number(filterss.maxPrice)) &&
+    (filters.minYear === "" || car.firstRegistrationYear >= Number(filters.minYear)) &&
+    (filters.maxYear === "" || car.firstRegistrationYear >= Number(filters.maxYear))
   );
 
   return (
@@ -54,6 +62,35 @@ function App() {
             <option value="Automatic">Automatic</option>
             <option value="Manual">Manual</option>
           </select>
+
+          <input
+          type="number"
+          placeholder="Min Price"
+          value={filters.minPrice}
+          onChange={(e) => setFilters({...filters, minPrice:e.target.value})}
+          onWheel={(e) => e.target.blur()}
+          />
+          <input
+          type="number"
+          placeholder="Max Price"
+          value={filters.maxPrice}
+          onChange={(e) => setFilters({...filters, maxPrice:e.target.value})}
+          onWheel={(e) => e.target.blur()}
+          />
+          <input
+          type="number"
+          placeholder="Min Year"
+          value={filters.minYear}
+          onChange={(e) => setFilters({...filters, minYear: e.target.value})}
+          onWheel={(e) => e.target.blur()}
+          />
+          <input
+          type="number"
+          placeholder="Max Year"
+          value={filters.maxYear}
+          onChange={(e) => setFilters({...filters, maxYear: e.target.value})}
+          onWheel={(e) => e.target.blur()}
+          />
         </div>}
       </div>
 
