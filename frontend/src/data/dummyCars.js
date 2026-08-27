@@ -19,7 +19,7 @@ export const dummyCars = [
     firstRegistrationYear: 2019,
     isUlezCompliant: true,
     images: [
-      { path: "https://via.placeholder.com/300x200", isMain: true },
+      { path: "https://placehold.co/300x200", isMain: true },
     ],
   },
   {
@@ -42,7 +42,7 @@ export const dummyCars = [
     firstRegistrationYear: 2017,
     isUlezCompliant: true,
     images: [
-      { path: "https://via.placeholder.com/300x200", isMain: true },
+      { path: "https://placehold.co/300x200", isMain: true },
     ],
   },
   {
@@ -65,7 +65,7 @@ export const dummyCars = [
     firstRegistrationYear: 2016,
     isUlezCompliant: false,
     images: [
-      { path: "https://via.placeholder.com/300x200", isMain: true },
+      { path: "https://placehold.co/300x200", isMain: true },
     ],
   },
   {
@@ -88,7 +88,7 @@ export const dummyCars = [
     firstRegistrationYear: 2018,
     isUlezCompliant: true,
     images: [
-      { path: "https://via.placeholder.com/300x200", isMain: true },
+      { path: "https://placehold.co/300x200", isMain: true },
     ],
   },
   {
@@ -111,7 +111,7 @@ export const dummyCars = [
     firstRegistrationYear: 2020,
     isUlezCompliant: true,
     images: [
-      { path: "https://via.placeholder.com/300x200", isMain: true },
+      { path: "https://placehold.co/300x200", isMain: true },
     ],
   },
   {
@@ -134,7 +134,7 @@ export const dummyCars = [
     firstRegistrationYear: 2021,
     isUlezCompliant: true,
     images: [
-      { path: "https://via.placeholder.com/300x200", isMain: true },
+      { path: "https://placehold.co/300x200", isMain: true },
     ],
   },
 ];
