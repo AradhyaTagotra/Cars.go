@@ -1,0 +1,5 @@
+﻿CREATE TABLE status
+(
+    id SMALLINT PRIMARY KEY, 
+    name VARCHAR(50) NOT NULL UNIQUE
+);
