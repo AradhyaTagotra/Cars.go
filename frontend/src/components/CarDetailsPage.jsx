@@ -1,21 +1,30 @@
-import "./CarDetailsPage.css";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { dummyCars } from "../data/dummyCars";
+import "./CarDetailsPage.css";
 
 function CarDetailsPage() {
   const { id } = useParams();
-  const car = dummyCars.find(c => c.id === Number(id));
+  const [car, setCar] = useState(null);
 
-  if (!car) return <p>Car not found</p>;
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/vehicles`)
+      .then(res => res.json())
+      .then(data => {
+        const found = data.find(c => c.id === Number(id));
+        setCar(found);
+      });
+  }, [id]);
+
+  if (!car) return <p>Loading...</p>;
 
   return (
     <div className="details-page">
       <Link to="/" className="details-back-link">&larr; Back to listings</Link>
-      <img src={car.images[0].path} alt={`${car.make} ${car.model}`} className="details-image" />
-      <h2 className="details-title">{car.make} {car.model} ({car.firstRegistrationYear})</h2>
-      <p className="details-price">£{car.price.toLocaleString()}</p>
-      <p className="details-meta">{car.mileage.toLocaleString()} miles · {car.fuelType} · {car.gearboxType}</p>
-      <p className="details-meta">{car.noOfDoors} doors · {car.noOfSeats} seats</p>
+      {/* <img src="https://placehold.co/600x400" alt={`${car.make} ${car.model}`} className="details-image" /> */}
+      <h2 className="details-title">{car.make} {car.model} ({car.first_registration_year})</h2>
+      <p className="details-price">£{Number(car.price).toLocaleString()}</p>
+      <p className="details-meta">{car.mileage.toLocaleString()} miles · {car.fuel_type} · {car.gearbox_type}</p>
+      <p className="details-meta">{car.no_of_doors} doors · {car.no_of_seats} seats</p>
       <p className="details-summary">{car.summary}</p>
     </div>
   );

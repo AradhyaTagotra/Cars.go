@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { dummyCars } from "../data/dummyCars";
+import { useState, useEffect } from "react";
 import CarCard from "./CarCard";
 import { Link } from "react-router-dom";
 
 function CarListPage() {
+  const [cars, setCars] = useState([]);
   const [filters, setFilters] = useState({
     make: "",
     fuelType: "",
@@ -15,16 +15,24 @@ function CarListPage() {
     maxYear: "",
   });
 
-  const filteredCars = dummyCars.filter(car =>
+  useEffect ( () => {
+    fetch("http://localhost:5000/api/vehicles")
+    .then(res => res.json())
+    .then(data => setCars(data))
+    .catch(err => console.error("Failed to fetch vehicles:", err));
+  }, []);
+
+   const filteredCars = cars.filter(car =>
     (filters.make === "" || car.make === filters.make) &&
-    (filters.fuelType === "" || car.fuelType === filters.fuelType) &&
-    (filters.bodyType === "" || car.bodyType === filters.bodyType) &&
-    (filters.gearboxType === "" || car.gearboxType === filters.gearboxType) &&
-    (filters.minPrice === "" || car.price >= Number(filters.minPrice)) &&
-    (filters.maxPrice === "" || car.price <= Number(filterss.maxPrice)) &&
-    (filters.minYear === "" || car.firstRegistrationYear >= Number(filters.minYear)) &&
-    (filters.maxYear === "" || car.firstRegistrationYear >= Number(filters.maxYear))
+    (filters.fuelType === "" || car.fuel_type === filters.fuelType) &&
+    (filters.bodyType === "" || car.body_type === filters.bodyType) &&
+    (filters.gearboxType === "" || car.gearbox_type === filters.gearboxType) &&
+    (filters.minPrice === "" || Number(car.price) >= Number(filters.minPrice)) &&
+    (filters.maxPrice === "" || Number(car.price) <= Number(filters.maxPrice)) &&
+    (filters.minYear === "" || car.first_registration_year >= Number(filters.minYear)) &&
+    (filters.maxYear === "" || car.first_registration_year <= Number(filters.maxYear))
   );
+
 
   return (
     <div>
@@ -99,13 +107,13 @@ function CarListPage() {
       </div>
 
       <div className="car-grid">
-        {filteredCars.length === 0? (
-            <p>No cars match your filters.</p>
-        ) :
-        (filteredCars.map(car => (
-          <Link key={car.id} to={`/car/ ${car.id}`}  style={{textDecoration: "none", color:"inherit"}}>
-            <CarCard car={car}/>
-          </Link>
+        {filteredCars.length === 0 ? (
+          <p>No cars match your filters.</p>
+        ) : (
+          filteredCars.map(car => (
+            <Link key={car.id} to={`/car/${car.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+              <CarCard car={car} />
+            </Link>
         ))
         )}
       </div>
