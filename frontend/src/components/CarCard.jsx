@@ -3,7 +3,9 @@ import "./CarCard.css";
 function CarCard({ car }) {
     return (
         <div className="car-card">
-            {/* <img src={car.image} alt={`${car.make} ${car.model}`} className="car-image" /> */}
+            <img src={car.images.find(img => img.ismainimage)?.imagepath || car.images[0]?.imagepath}
+             alt={`${car.make} ${car.model}`}
+             className="car-image" />
             <div className="car-info">
                 <h3 className="car-title">{car.make} {car.model} ({car.first_registration_year})</h3>
                 <p className="car-price">£{Number(car.price).toLocaleString()}</p>

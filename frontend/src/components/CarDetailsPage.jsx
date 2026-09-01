@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import ImageGallery from "./ImageGallery";
 import "./CarDetailsPage.css";
 
 function CarDetailsPage() {
@@ -20,7 +21,7 @@ function CarDetailsPage() {
   return (
     <div className="details-page">
       <Link to="/" className="details-back-link">&larr; Back to listings</Link>
-      {/* <img src="https://placehold.co/600x400" alt={`${car.make} ${car.model}`} className="details-image" /> */}
+     <ImageGallery images={car.images}/>
       <h2 className="details-title">{car.make} {car.model} ({car.first_registration_year})</h2>
       <p className="details-price">£{Number(car.price).toLocaleString()}</p>
       <p className="details-meta">{car.mileage.toLocaleString()} miles · {car.fuel_type} · {car.gearbox_type}</p>
