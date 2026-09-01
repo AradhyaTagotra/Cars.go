@@ -19,7 +19,7 @@ app.get("/api/test-db",async  (req,res) =>{
 
 app.get("/api/vehicles", async (req, res) => {
   try {
-    const result = await pool.query(`
+    const vehiclesResult = await pool.query(`
       SELECT
         vehicle.id,
         vehicle.summary,
@@ -41,8 +41,14 @@ app.get("/api/vehicles", async (req, res) => {
       LEFT JOIN gearbox_type ON vehicle.gearbox_type = gearbox_type.id
       LEFT JOIN fuel_type ON vehicle.fuel_type = fuel_type.id
       LEFT JOIN body_type ON vehicle.body_type = body_type.id
-    `);
-    res.json(result.rows);
+    `); 
+
+    const imagesResult = await pool.query('SELECT * FROM vehicle_images');
+    const vehiclesWithImages = vehiclesResult.rows.map(vehicle => ({
+      ...vehicle, 
+      images: imagesResult.rows.filter(img => img.vehicleid === vehicle.id),
+    }));
+    res.json(vehiclesWithImages);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
