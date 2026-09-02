@@ -20,6 +20,9 @@ function CarDetailsPage() {
 
   return (
     <div className="details-page">
+      <div className="breadcrumbs">
+        <Link to="/">Home</Link> / <span>{car.make} {car.model}</span>
+      </div>
       <Link to="/" className="details-back-link">&larr; Back to listings</Link>
      <ImageGallery images={car.images}/>
       <h2 className="details-title">{car.make} {car.model} ({car.first_registration_year})</h2>

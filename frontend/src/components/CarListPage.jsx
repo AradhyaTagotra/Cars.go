@@ -40,8 +40,11 @@ function CarListPage() {
         <h1>CarFinder</h1>
         <p>Find your next car, quickly and simply</p>
       </header>
-      <div className="filters">
-        {<div className="filters">
+      <div className="results-layout">
+        <aside className="filters-sidebar">
+          <h3>Filters</h3>
+        
+        
           <select value={filters.make} onChange={(e) => setFilters({ ...filters, make: e.target.value })}>
             <option value="">All Makes</option>
             <option value="Honda">Honda</option>
@@ -103,10 +106,10 @@ function CarListPage() {
             onChange={(e) => setFilters({ ...filters, maxYear: e.target.value })}
             onWheel={(e) => e.target.blur()}
           />
-        </div>}
-      </div>
+        </aside>
+      
 
-      <div className="car-grid">
+      <main className="car-grid">
         {filteredCars.length === 0 ? (
           <p>No cars match your filters.</p>
         ) : (
@@ -116,6 +119,7 @@ function CarListPage() {
             </Link>
         ))
         )}
+        </main>
       </div>
     </div>
   );
