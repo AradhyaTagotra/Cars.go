@@ -3,6 +3,7 @@ const cors =require("cors");
 require("dotenv").config();
 const pool = require("./db");
 const bcrypt =require("bcrypt");
+const jwt =require("jsonwebtoken");
 
 const app = express();
 app.use(cors());
@@ -73,7 +74,14 @@ app.post("/api/login",  async (req,res) => {
     if(!passwordMatches){
       return res.status(401).json({error: "Invaild email or password"});
     }
-    res.json({message: "Login successful" ,role: user.role, email: user.email});
+
+    const token  =jwt.sign(
+      {id: user.id ,role: user.role, email: user.email},
+      process.env.JWT_SECRET,
+      {expiresIn : "8h"}
+    );
+
+    res.json({message: "Login successful" ,token, role: user.role, email: user.email});
    }
    catch (err){
     res.status(500).json({error: "err.message"});
