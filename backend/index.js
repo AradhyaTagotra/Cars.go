@@ -4,6 +4,7 @@ require("dotenv").config();
 const pool = require("./db");
 const bcrypt =require("bcrypt");
 const jwt =require("jsonwebtoken");
+const verifyToken = require("./authMiddleware");
 
 const app = express();
 app.use(cors());
@@ -86,6 +87,25 @@ app.post("/api/login",  async (req,res) => {
    catch (err){
     res.status(500).json({error: "err.message"});
    }
+});
+
+app.post("/api/admin/create-admin" ,verifyToken, async (req,res) =>{
+  if(req.user.role !== "root"){
+    res.status(403).json({error:"Only the root user can create admin accounts"});
+  }
+  const {email, password} =req.body;
+
+  try{
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result  = await pool.query(
+      "INSERT INTO users (email, password_hash, role) VALUES ($1,$2,$3) RETURNING email, id , role",
+      [email, hashedPassword, "admin"]
+    );
+    res.json({message: "Admin created successfully", user: result.rows[0]});
+  }
+  catch(err){
+    res.status(500).json({error :"err.message"})
+  }
 });
 
 app.get("/" , (req,res)=>{
