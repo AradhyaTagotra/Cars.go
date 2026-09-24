@@ -225,6 +225,8 @@ app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
+    await pool.query("DELETE FROM vehicle_images WHERE vehicleid = $1", [id]);
+
     const result = await pool.query(
       "DELETE FROM vehicle WHERE id = $1 RETURNING *",
       [id]
