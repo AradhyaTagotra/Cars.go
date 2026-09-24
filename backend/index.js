@@ -183,37 +183,31 @@ app.post("/api/vehicles" , verifyToken, async (req, res) => {
   }
 });
 
-app.put("/api/vehicles/:id" ,verifyToken, async (req,res) =>{
-if(req.user.role !== "root" && req.user.role !== "admin"){
-    return res.status(403).json({error : "Only admin can edit listings"});
+app.put("/api/vehicles/:id", verifyToken, async (req, res) => {
+  if (req.user.role !== "root" && req.user.role !== "admin") {
+    return res.status(403).json({ error: "Only admin can edit listings" });
   }
 
-  const {id} =req.params;
-  const {
-    summary, description, make, model, status, gearbox_type,
-    fuel_type, body_type, mileage, price, no_of_seats, no_of_doors, first_registration_year
-  } = req.body;
+  const { id } = req.params;
+  const { summary, description, mileage, price } = req.body;
 
-  try{
+  try {
     const result = await pool.query(
-    `UPDATE vehicle SET
-    summary = $1, description =$2, make= $3, model =$4, status = $5, gearbox_type = $6,
-    fuel_type= $7, body_type = $8, mileage =$9, price =$10, no_of_seats = $11, no_of_doors =$12, first_registration_year= $13,
-    updated_at =NOW()
-    WHERE id =$14
-    RETURNING *`,
-    [summary, description, make, model, status, gearbox_type,
-    fuel_type, body_type, mileage, price, no_of_seats, no_of_doors, first_registration_year,id]
+      `UPDATE vehicle SET
+      summary = $1, description = $2, mileage = $3, price = $4,
+      updated_at = NOW()
+      WHERE id = $5
+      RETURNING *`,
+      [summary, description, mileage, price, id]
     );
 
-    if(result.rows.length === 0){
-      return res.status(404).json({error: "Vehicle not found"});
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Vehicle not found" });
     }
 
-    res.json({message :"Vehicle updated successfully", vehicle: result.rows[0]});
-  }
-  catch(err) {
-    res.status(500).json({error :err.message});
+    res.json({ message: "Vehicle updated successfully", vehicle: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
