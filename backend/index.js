@@ -236,6 +236,29 @@ app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/api/lookups",  async(req, res) => {
+  try {
+    const [makes, statuses, gearboxTypes, fuelTypes, bodyTypes]= await Promise.all([
+      pool.query("SELECT id, name FROM make ORDER BY name"),
+      pool.query("SELECT id, name FROM status ORDER BY name"),
+      pool.query("SELECT id, name FROM gearbox_type ORDER BY name"),
+      pool.query("SELECT id, name FROM fuel_type ORDER BY name"),
+      pool.query("SELECT id, name FROM body_type ORDER BY name")
+    ]);
+
+    res.json({
+      makes: makes.rows,
+      statuses: statuses.rows,
+      gearboxTypes: gearboxTypes.rows,
+      fuelTypes: fuelTypes.rows,
+      bodyTypes: bodyTypes.rows
+    });
+  }
+  catch (err){
+    res.status(500).json({error : err.message});
+  }
+});
+
 app.get("/" , (req,res)=>{
     res.send("Carslist backend is running");
 });
