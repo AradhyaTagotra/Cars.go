@@ -50,6 +50,7 @@ function AdminDashboard() {
                     <div style={{display: "flex", justifyContent: "space-between", alignItems:"center"}} >
                     <h2>Admin Dashboard</h2>
                     <button onClick={handleLogout}>Log Out</button>
+                    <button onClick={() => navigate("/admin/add")}>Add new vehicle</button>
                     </div>
                     {error && <p className="error-text">{error}</p>}
 

@@ -5,6 +5,7 @@ import "./App.css";
 import LoginPage from "./components/LoginPage";
 import AdminDashboard from "./components/AdminDashboard";
 import EditVehicle from "./components/EditVehicle";
+import AddVehicle from "./components/AddVehicle";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Route path="/admin/login" element={<LoginPage/>}/>
       <Route path="/admin/dashboard" element={<AdminDashboard/>}/>
       <Route path="/admin/edit/:id" element={<EditVehicle/>}/>
+      <Route path="/admin/add" element={<AddVehicle/>}/>
     </Routes>
     <footer className="site-footer">
      <p>&copy; 2026 CarFinder. All rights reserved.</p>
