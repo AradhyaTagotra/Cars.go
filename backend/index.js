@@ -202,7 +202,7 @@ app.post("/api/vehicles", verifyToken, async (req, res) => {
 });
 
 app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (req,res) => {
-  if(req.user.role === "root" && req.user.role !== "admin"){
+  if(req.user.role !== "root" && req.user.role !== "admin"){
     return res.status(403).json({error: "Only admin can upload images"});
   }
   const {id} = req.params;
