@@ -222,7 +222,7 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
         ContentType: req.file.mimetype,
       },
     });
-    await Upload.done();
+    await upload.done();
       const imageUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
 
     const result = await pool.query(
