@@ -210,7 +210,7 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
   if(!req.file){
     return res.status(400).json({error: "No image file provided"});
   }
-  const fileKey =`/vehicles/${id}/${Date.now()}-${req.file.originalname}`;
+  const fileKey =`vehicles/${id}/${Date.now()}-${req.file.originalname}`;
 
   try{
      const upload = new Upload({
@@ -224,6 +224,7 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
     });
     await upload.done();
       const imageUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+      console.log("fileKey:", fileKey, "| imageUrl:", imageUrl);
 
     const result = await pool.query(
       "INSERT INTO vehicle_images (vehicleid, imagepath, ismainimage) VALUES ($1, $2, false) RETURNING *",
