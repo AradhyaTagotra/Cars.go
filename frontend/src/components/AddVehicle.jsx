@@ -35,6 +35,28 @@ function AddVehicle() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+
+        const currentYear = new Date().getFullYear(); 
+
+        if(Number(formData.price <= 0)){
+            setError("Price must be greater than 0");
+            return;
+        }
+
+        if(Number(formData.mileage <= 0)){
+            setError("Mileage cannot be negative");
+            return;
+        }
+        if(Number(formData.first_registration_year) < 1900 || Number(formData.first_registration_year) > currentYear){
+            setError(`Registration year must be between 1900 and ${currentYear}`);
+            return;
+        }
+
+        if(Number(formData.no_of_seats <= 0) || Number(formData.no_of_doors <= 0)){
+            setError("seats and doors must be at least 1");
+            return;
+        }
+
         const token = localStorage.getItem("token");
 
 

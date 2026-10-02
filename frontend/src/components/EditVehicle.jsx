@@ -27,6 +27,16 @@ function EditVehicle() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (Number(formData.price) <= 0) {
+      setError("Price must be greater than 0");
+      return;
+    }
+
+    if (Number(formData.mileage) < 0) {
+      setError("Mileage cannot be negative");
+      return;
+    }
     const token = localStorage.getItem("token");
 
     const updatedFields = {
