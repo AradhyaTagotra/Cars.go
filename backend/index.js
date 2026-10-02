@@ -5,10 +5,23 @@ const pool = require("./db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const verifyToken = require("./authMiddleware");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { Upload } = require("@aws-sdk/lib-storage");
+const multer = require("multer");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.get("/api/test-db", async (req, res) => {
   try {
@@ -185,6 +198,42 @@ app.post("/api/vehicles", verifyToken, async (req, res) => {
   }
   catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (req,res) => {
+  if(req.user.role === "root" && req.user.role !== "admin"){
+    return res.status(403).json({error: "Only admin can upload images"});
+  }
+  const {id} = req.params;
+
+  if(!req.file){
+    return res.status(400).json({error: "No image file provided"});
+  }
+  const fileKey =`/vehicles/${id}/${Date.now()}-${req.file.originalname}`;
+
+  try{
+     const upload = new Upload({
+      client: s3,
+      params: {
+        Bucket: process.env.AWS_S3_BUCKET,
+        Key: fileKey,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      },
+    });
+    await Upload.done();
+      const imageUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+
+    const result = await pool.query(
+      "INSERT INTO vehicle_images (vehicleid, imagepath, ismainimage) VALUES ($1, $2, false) RETURNING *",
+      [id, imageUrl]
+    );
+    res.json({message: "Image uploaded successfully", image:result.rows[0]});
+  }
+  catch(err){
+    console.error(err);
+    res.status(500).json({error: err.message});
   }
 });
 
