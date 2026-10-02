@@ -7,12 +7,29 @@ function CreateAdmin() {
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
         setMessage("");
+
+        const trimmedEmail = email.trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(trimmedEmail)) {
+            setError("Please enter a valid email address");
+            return;
+        }
+
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters");
+            return;
+        }
+
+        setLoading(true);
         const token = localStorage.getItem("token");
 
         try {
@@ -22,19 +39,23 @@ function CreateAdmin() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email: trimmedEmail, password }),
             });
+
             const data = await res.json();
 
             if (!res.ok) {
                 setError(data.error || "Failed to create admin");
                 return;
             }
-            setMessage(`Admin created : ${data.user.email}`);
+
+            setMessage(`Admin created: ${data.user.email}`);
             setEmail("");
             setPassword("");
         } catch (err) {
-            setError("Something went wrong while creating the admin")
+            setError("Something went wrong while creating the admin");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -93,7 +114,9 @@ function CreateAdmin() {
                 </div>
                 {error && <p className="error-text">{error}</p>}
                 {message && <p className="success-text">{message}</p>}
-                <button type="submit" className="btn-primary">Create Admin</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Creating..." : "Create Admin"}
+                </button>
             </form>
             <button onClick={() => navigate("/admin/dashboard")} className="btn-secondary">Back to Dashboard</button>
         </div>
