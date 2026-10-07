@@ -8,6 +8,7 @@ function CarDetailsPage() {
   const [car, setCar] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const isAdmin = localStorage.getItem("role") === "root";
 
   const loadCar = () => {
     fetch(`/api/vehicles`)
@@ -59,8 +60,12 @@ function CarDetailsPage() {
       </div>
       <Link to="/" className="details-back-link">&larr; Back to listings</Link>
      <ImageGallery images={car.images}/>
-     <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading}/>
+     {isAdmin && (
+      <>
+      <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading}/>
      {message && <p>{message}</p>}
+     </>
+     )}
       <h2 className="details-title">{car.make} {car.model} ({car.first_registration_year})</h2>
       <p className="details-price">£{Number(car.price).toLocaleString()}</p>
       <p className="details-meta">{car.mileage.toLocaleString()} miles · {car.fuel_type} · {car.gearbox_type}</p>
