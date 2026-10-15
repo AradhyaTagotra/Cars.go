@@ -262,7 +262,7 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
         Key: imagepath.slice(prefix.length),
       }));
     }
-    await pool.query("DELETE FROM vehicles_images WHERE id  = $1" , [imageId]);
+    await pool.query("DELETE FROM vehicle_images WHERE id  = $1" , [imageId]);
     res.json({message: "Image deleted successfully"});
    }catch (err){
     console.error(err);
