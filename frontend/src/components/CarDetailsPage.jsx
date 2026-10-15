@@ -8,7 +8,8 @@ function CarDetailsPage() {
   const [car, setCar] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
-  const isAdmin = localStorage.getItem("role") === "root";
+   const role = localStorage.getItem("role");
+  const isAdmin = role === "root" || role === "admin";
 
   const loadCar = () => {
     fetch(`/api/vehicles`)
@@ -59,7 +60,7 @@ function CarDetailsPage() {
         <Link to="/">Home</Link> / <span>{car.make} {car.model}</span>
       </div>
       <Link to="/" className="details-back-link">&larr; Back to listings</Link>
-     <ImageGallery images={car.images}/>
+      <ImageGallery images={car.images} vehicleId={car.id} isAdmin={isAdmin} onChange={loadCar} />
      {isAdmin && (
       <>
       <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading}/>
