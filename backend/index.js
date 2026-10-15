@@ -5,7 +5,7 @@ const pool = require("./db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const verifyToken = require("./authMiddleware");
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { Upload } = require("@aws-sdk/lib-storage");
 const multer = require("multer");
 
@@ -236,6 +236,38 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
     console.error(err);
     res.status(500).json({error: err.message});
   }
+});
+
+app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
+   if(req.user.role !== "root" && req.user.role !== "admin"){
+    return res.status(403).json({error: "Only admin can delete images"});
+   }
+
+   const {id, imageId} =req.params;
+
+   try{
+    const found = await pool.query(
+      "SELECT * FROM vehicle_images WHERE id = $1 AND Vehicleid = $2",
+      [imageId, id]
+    );
+    if(found.rows.length === 0){
+      return res.status(404).json({error: "Image not found"});
+    }
+    const imagepath = found.rows[0].imagepath;
+    const prefix = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
+
+    if(imagepath.startsWith(prefix)){
+      await s3.send(new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET,
+        Key: imagepath.slice(prefix.length),
+      }));
+    }
+    await pool.query("DELETE FROM vehicles_images WHERE id  = $1" , [imageId]);
+    res.json({message: "Image deleted successfully"});
+   }catch (err){
+    console.error(err);
+    res.status(500).json({error: err.message});
+   }
 });
 
 app.put("/api/vehicles/:id", verifyToken, async (req, res) => {
