@@ -263,8 +263,9 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
     );
     if(found.rows.length === 0){
       return res.status(404).json({error: "Image not found"});
-      console.info(`Deleting image ${imageId} of vehicle ${id} by ${req.user.email}`);
+      
     }
+    console.info(`Deleting image ${imageId} of vehicle ${id} by ${req.user.email}`);
     const imagepath = found.rows[0].imagepath;
     const prefix = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 
