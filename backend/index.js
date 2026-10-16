@@ -154,7 +154,7 @@ app.post("/api/login", async (req, res) => {
     res.json({ message: "Login successful", token, role: user.role, email: user.email });
   }
   catch (err) {
-    console.error("Upload image failed:", { vehicleId: id, error: err.message });
+    
     res.status(500).json({ error: err.message });
   }
 });
@@ -176,7 +176,7 @@ app.post("/api/admin/create-admin", verifyToken, async (req, res) => {
   }
   catch (err) {
     res.status(500).json({ error: err.message });
-    console.error("Upload image failed:", { vehicleId: id, error: err.message });
+    
   }
 });
 
@@ -205,7 +205,7 @@ app.post("/api/vehicles", verifyToken, async (req, res) => {
   }
   catch (err) {
     res.status(500).json({ error: err.message });
-    console.error("Upload image failed:", { vehicleId: id, error: err.message });
+    
   }
 });
 
@@ -338,7 +338,7 @@ app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
 
     res.json({ message: "Vehicle deleted successfully" });
   } catch (err) {
-    console.error("Delete image failed:", { imageId, vehicleId: id, error: err.message });
+    
     res.status(500).json({ error: err.message });
   }
 });
