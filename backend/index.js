@@ -150,9 +150,11 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "8h" }
     );
 
+
     res.json({ message: "Login successful", token, role: user.role, email: user.email });
   }
   catch (err) {
+    console.error("Upload image failed:", { vehicleId: id, error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
@@ -169,10 +171,12 @@ app.post("/api/admin/create-admin", verifyToken, async (req, res) => {
       "INSERT INTO users (email, password_hash, role) VALUES ($1,$2,$3) RETURNING email, id , role",
       [email, hashedPassword, "admin"]
     );
+    
     res.json({ message: "Admin created successfully", user: result.rows[0] });
   }
   catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
+    console.error("Upload image failed:", { vehicleId: id, error: err.message });
   }
 });
 
@@ -196,10 +200,12 @@ app.post("/api/vehicles", verifyToken, async (req, res) => {
       [summary, description, make, model, status, gearbox_type,
         fuel_type, body_type, mileage, price, no_of_seats, no_of_doors, first_registration_year]
     );
+    
     res.json({ message: "Vehicle created successfully", vehicle: result.rows[0] });
   }
   catch (err) {
     res.status(500).json({ error: err.message });
+    console.error("Upload image failed:", { vehicleId: id, error: err.message });
   }
 });
 
@@ -232,16 +238,19 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
       "INSERT INTO vehicle_images (vehicleid, imagepath, ismainimage) VALUES ($1, $2, false) RETURNING *",
       [id, imageUrl]
     );
+    console.info(`Image uploaded: vehicle ${id}, key ${fileKey}, by ${req.user.email}`);
     res.json({message: "Image uploaded successfully", image:result.rows[0]});
   }
   catch(err){
     console.error(err);
+    console.error("Upload image failed:", { vehicleId: id, error: err.message });
     res.status(500).json({error: err.message});
   }
 });
 
 app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
    if(req.user.role !== "root" && req.user.role !== "admin"){
+    console.warn(`Delete image refused: ${req.user.email} has role ${req.user.role}`);
     return res.status(403).json({error: "Only admin can delete images"});
    }
 
@@ -254,6 +263,7 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
     );
     if(found.rows.length === 0){
       return res.status(404).json({error: "Image not found"});
+      console.info(`Deleting image ${imageId} of vehicle ${id} by ${req.user.email}`);
     }
     const imagepath = found.rows[0].imagepath;
     const prefix = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
@@ -268,6 +278,7 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
     res.json({message: "Image deleted successfully"});
    }catch (err){
     console.error(err);
+    console.error("Delete image failed:", { imageId, vehicleId: id, error: err.message });
     res.status(500).json({error: err.message});
    }
 });
@@ -306,6 +317,7 @@ app.put("/api/vehicles/:id", verifyToken, async (req, res) => {
 
 app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
   if (req.user.role !== "root" && req.user.role !== "admin") {
+    
     return res.status(403).json({ error: "Only admins can delete listings" });
   }
 
@@ -321,10 +333,12 @@ app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Vehicle not found" });
+      
     }
 
     res.json({ message: "Vehicle deleted successfully" });
   } catch (err) {
+    console.error("Delete image failed:", { imageId, vehicleId: id, error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
