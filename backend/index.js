@@ -12,6 +12,8 @@ const multer = require("multer");
 const app = express();
 app.use(cors());
 app.use(express.json());
+const morgan = require("morgan");
+app.use(morgan("dev"));
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
