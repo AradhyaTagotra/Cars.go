@@ -8,6 +8,7 @@ const verifyToken = require("./authMiddleware");
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { Upload } = require("@aws-sdk/lib-storage");
 const multer = require("multer");
+const { isAdminRole, getS3Key } = require("./helpers");
 
 const app = express();
 app.use(cors());
@@ -210,7 +211,7 @@ app.post("/api/vehicles", verifyToken, async (req, res) => {
 });
 
 app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (req,res) => {
-  if(req.user.role !== "root" && req.user.role !== "admin"){
+  if(!isAdminRole(req.user.role)){
     return res.status(403).json({error: "Only admin can upload images"});
   }
   const {id} = req.params;
@@ -249,7 +250,7 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
 });
 
 app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
-   if(req.user.role !== "root" && req.user.role !== "admin"){
+   if(!isAdminRole(req.user.role)){
     console.warn(`Delete image refused: ${req.user.email} has role ${req.user.role}`);
     return res.status(403).json({error: "Only admin can delete images"});
    }
@@ -266,13 +267,13 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
       
     }
     console.info(`Deleting image ${imageId} of vehicle ${id} by ${req.user.email}`);
-    const imagepath = found.rows[0].imagepath;
-    const prefix = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
+        const key = getS3Key(found.rows[0].imagepath, process.env.AWS_S3_BUCKET, process.env.AWS_REGION);
 
-    if(imagepath.startsWith(prefix)){
+    // only delete from S3 if the file lives in our bucket
+    if (key) {
       await s3.send(new DeleteObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET,
-        Key: imagepath.slice(prefix.length),
+        Key: key,
       }));
     }
     await pool.query("DELETE FROM vehicle_images WHERE id  = $1" , [imageId]);
@@ -372,6 +373,10 @@ app.get("/", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+if(require.main === module){
+  app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
+ });
+}
+
+module.exports =app;
