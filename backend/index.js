@@ -135,6 +135,7 @@ app.post("/api/login", async (req, res) => {
       [email]
     );
     if (result.rows.length === 0) {
+      console.warn(`Login failed: no user with email ${email}`);
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
@@ -142,6 +143,7 @@ app.post("/api/login", async (req, res) => {
     const passwordMatches = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordMatches) {
+      console.warn(`Login failed: wrong password for ${email}`);
       return res.status(401).json({ error: "Invalid email or password" });
     }
 

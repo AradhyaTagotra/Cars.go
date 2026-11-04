@@ -13,6 +13,7 @@ const user = { id: 7, email: "admin@example.com", password_hash: "hashed", role:
 
 beforeAll(() => {
   jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 beforeEach(() => {
