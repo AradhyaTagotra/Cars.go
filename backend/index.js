@@ -9,6 +9,7 @@ const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/cl
 const { Upload } = require("@aws-sdk/lib-storage");
 const multer = require("multer");
 const { isAdminRole, getS3Key } = require("./helpers");
+const logger = require("./logger");
 
 const app = express();
 app.use(cors());
@@ -241,12 +242,12 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
       "INSERT INTO vehicle_images (vehicleid, imagepath, ismainimage) VALUES ($1, $2, false) RETURNING *",
       [id, imageUrl]
     );
-    console.info(`Image uploaded: vehicle ${id}, key ${fileKey}, by ${req.user.email}`);
+   logger.info(`Image uploaded: vehicle ${id}, key ${fileKey}, by ${req.user.email}`);
     res.json({message: "Image uploaded successfully", image:result.rows[0]});
   }
   catch(err){
     console.error(err);
-    console.error("Upload image failed:", { vehicleId: id, error: err.message });
+    logger.error("Upload image failed", { vehicleId: id, error: err.message });
     res.status(500).json({error: err.message});
   }
 });

@@ -14,12 +14,14 @@ jest.mock("@aws-sdk/client-s3", () => ({
 jest.mock("@aws-sdk/lib-storage", () => ({
   Upload: jest.fn().mockImplementation(() => ({ done: mockUploadDone })),
 }));
+jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const app = require("../index");
+const logger = require("../logger");
 
 const tokenFor = (role) =>
   jwt.sign({ id: 1, role, email: "t@example.com" }, "test-secret", { expiresIn: "1h" });
@@ -27,9 +29,9 @@ const tokenFor = (role) =>
 const BASE = "https://test-bucket.s3.eu-north-1.amazonaws.com/";
 
 beforeAll(() => {
-  jest.spyOn(console, "info").mockImplementation(() => {});
-  jest.spyOn(console, "warn").mockImplementation(() => {});
-  jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, "info").mockImplementation(() => { });
+  jest.spyOn(console, "warn").mockImplementation(() => { });
+  jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 beforeEach(() => {
@@ -37,6 +39,8 @@ beforeEach(() => {
   mockSend.mockReset();
   mockUploadDone.mockReset();
   DeleteObjectCommand.mockClear();
+  logger.info.mockClear();
+  logger.error.mockClear();
 });
 
 describe("POST /api/vehicles/:id/image", () => {
@@ -80,6 +84,7 @@ describe("POST /api/vehicles/:id/image", () => {
       expect.stringContaining("INSERT INTO vehicle_images"),
       ["3", expect.stringMatching(/^https:\/\/test-bucket\.s3\.eu-north-1\.amazonaws\.com\/vehicles\/3\/\d+-car\.jpg$/)]
     );
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining("Image uploaded: vehicle 3"));
   });
 });
 
@@ -142,7 +147,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
     expect(pool.query).toHaveBeenCalledTimes(2);
   });
 
-    test("500 when the S3 upload fails: nothing is saved in the database", async () => {
+  test("500 when the S3 upload fails: nothing is saved in the database", async () => {
     mockUploadDone.mockRejectedValueOnce(new Error("S3 down"));
 
     const res = await request(app)
@@ -153,6 +158,10 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
     expect(res.status).toBe(500);
     expect(res.body.error).toBe("S3 down");
     expect(pool.query).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      "Upload image failed",
+      expect.objectContaining({ vehicleId: "3", error: "S3 down" })
+    );
   });
 
   test("500 when S3 fails: the database row is NOT deleted", async () => {
