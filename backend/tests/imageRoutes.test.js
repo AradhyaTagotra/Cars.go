@@ -142,6 +142,19 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
     expect(pool.query).toHaveBeenCalledTimes(2);
   });
 
+    test("500 when the S3 upload fails: nothing is saved in the database", async () => {
+    mockUploadDone.mockRejectedValueOnce(new Error("S3 down"));
+
+    const res = await request(app)
+      .post("/api/vehicles/3/image")
+      .set("Authorization", `Bearer ${tokenFor("admin")}`)
+      .attach("image", Buffer.from("fake"), "car.jpg");
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe("S3 down");
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
   test("500 when S3 fails: the database row is NOT deleted", async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ id: 5, vehicleid: 3, imagepath: `${BASE}vehicles/3/123-car.jpg` }] });
     mockSend.mockRejectedValueOnce(new Error("S3 down"));
