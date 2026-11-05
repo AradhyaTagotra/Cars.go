@@ -1,4 +1,13 @@
 process.env.JWT_SECRET = "test-secret";
+process.env.AWS_S3_BUCKET = "test-bucket";
+process.env.AWS_REGION = "eu-north-1";
+
+const mockSend = jest.fn();
+jest.mock("@aws-sdk/client-s3", () => ({
+  S3Client: jest.fn().mockImplementation(() => ({ send: mockSend })),
+  PutObjectCommand: jest.fn(),
+  DeleteObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
+}));
 
 jest.mock("../db",() =>({query:jest.fn()}));
 
@@ -6,6 +15,8 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
 const app = require("../index");
+const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const BASE = "https://test-bucket.s3.eu-north-1.amazonaws.com/";
 
 const auth =(role) => ({
     Authorization : `Bearer ${jwt.sign({id:1, role, email:"test-user@example.com"}, "test-secret",{expiresIn: "1h"})}`,
@@ -24,6 +35,8 @@ beforeAll (() =>{
 
 beforeEach(() => {
   pool.query.mockReset();
+  mockSend.mockReset();
+  DeleteObjectCommand.mockClear();
 });
 
 describe("POST /api/vehicles", () => {
@@ -127,46 +140,61 @@ describe("PUT /api/vehicles/:id", () => {
 });
 
 describe("DELETE /api/vehicles/:id", () => {
-    test("401 without a token", async () => {
-        const res = await request(app).delete("/api/vehicles/7");
-        expect(res.status).toBe(401);
-    });
+  test("401 without a token", async () => {
+    const res = await request(app).delete("/api/vehicles/7");
+    expect(res.status).toBe(401);
+  });
 
-    test("403 for a normal user", async () => {
-        const res = await request(app)
-        .delete("/api/vehicles/7")
-        .set(auth("user"));
-        expect(res.status).toBe(403);
-        expect(res.body.error).toBe("Only admins can delete listings");
-        expect(pool.query).not.toHaveBeenCalled();
-    });
+  test("403 for a normal user", async () => {
+    const res = await request(app).delete("/api/vehicles/7").set(auth("user"));
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe("Only admins can delete listings");
+    expect(pool.query).not.toHaveBeenCalled();
+    expect(mockSend).not.toHaveBeenCalled();
+  });
 
-    test("404 when the vehicle does not exist", async () => {
-        pool.query.mockResolvedValueOnce({}).mockResolvedValueOnce({rows:[]});
-        const res = await request(app)
-        .delete("/api/vehicles/999")
-        .set(auth("admin"));
-        expect(res.status).toBe(404);
-        expect(res.body.error).toBe("Vehicle not found");
-    });
+  test("404 when the vehicle does not exist", async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).delete("/api/vehicles/999").set(auth("admin"));
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe("Vehicle not found");
+  });
 
-    test.each(["admin", "root"])("200 for %s: deletes images first, then the vehicle", async (role) => {
-        pool.query.mockResolvedValueOnce({}).mockResolvedValueOnce({rows:[{id:7}]});
+  test.each(["admin", "root"])("200 for %s: removes S3 files, image rows, then the vehicle", async (role) => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [{ imagepath: `${BASE}vehicles/7/1-a.jpg` }, { imagepath: "https://m.atcdn.co.uk/x.jpg" }] })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ rows: [{ id: 7 }] });
 
-        const res = await request(app)
-        .delete("/api/vehicles/7")
-        .set(auth(role));
-        expect(res.status).toBe(200);
-        expect(res.body.message).toBe("Vehicle deleted successfully");
-        expect(pool.query).toHaveBeenNthCalledWith(1, expect.stringContaining("DELETE FROM vehicle_images"), ["7"]);
-        expect(pool.query).toHaveBeenNthCalledWith(2, expect.stringContaining("DELETE FROM vehicle WHERE"), ["7"]);
-    });
-    test("500 when the database fails", async () => {
-        pool.query.mockRejectedValueOnce(new Error("db down"));
-        const res = await request(app)
-        .delete("/api/vehicles/7")
-        .set(auth("admin"));
-        expect(res.status).toBe(500);
-    });
+    const res = await request(app).delete("/api/vehicles/7").set(auth(role));
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe("Vehicle deleted successfully");
+    expect(DeleteObjectCommand).toHaveBeenCalledTimes(1);
+    expect(DeleteObjectCommand).toHaveBeenCalledWith({ Bucket: "test-bucket", Key: "vehicles/7/1-a.jpg" });
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    expect(pool.query).toHaveBeenNthCalledWith(1, expect.stringContaining("SELECT imagepath"), ["7"]);
+    expect(pool.query).toHaveBeenNthCalledWith(2, expect.stringContaining("DELETE FROM vehicle_images"), ["7"]);
+    expect(pool.query).toHaveBeenNthCalledWith(3, expect.stringContaining("DELETE FROM vehicle WHERE"), ["7"]);
+  });
+
+  test("500 when S3 fails: nothing is deleted from the database", async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ imagepath: `${BASE}vehicles/7/1-a.jpg` }] });
+    mockSend.mockRejectedValueOnce(new Error("S3 down"));
+
+    const res = await request(app).delete("/api/vehicles/7").set(auth("admin"));
+
+    expect(res.status).toBe(500);
+    expect(pool.query).toHaveBeenCalledTimes(1);
+  });
+
+  test("500 when the database fails", async () => {
+    pool.query.mockRejectedValueOnce(new Error("db down"));
+    const res = await request(app).delete("/api/vehicles/7").set(auth("admin"));
+    expect(res.status).toBe(500);
+  });
 });
 

@@ -328,6 +328,20 @@ app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
+        const images = await pool.query(
+      "SELECT imagepath FROM vehicle_images WHERE vehicleid = $1",
+      [id]
+    );
+
+    for (const img of images.rows) {
+      const key = getS3Key(img.imagepath, process.env.AWS_S3_BUCKET, process.env.AWS_REGION);
+      if (key) {
+        await s3.send(new DeleteObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET,
+          Key: key,
+        }));
+      }
+    }
     await pool.query("DELETE FROM vehicle_images WHERE vehicleid = $1", [id]);
 
     const result = await pool.query(
