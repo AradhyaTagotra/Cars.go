@@ -41,6 +41,7 @@ beforeEach(() => {
   DeleteObjectCommand.mockClear();
   logger.info.mockClear();
   logger.error.mockClear();
+  logger.warn.mockClear();
 });
 
 describe("POST /api/vehicles/:id/image", () => {
@@ -100,6 +101,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
       .set("Authorization", `Bearer ${tokenFor("user")}`);
     expect(res.status).toBe(403);
     expect(pool.query).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("Delete image refused"));
   });
 
   test("404 when the image does not exist", async () => {
@@ -131,6 +133,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
       expect.stringContaining("DELETE FROM vehicle_images"),
       ["5"]
     );
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining("Deleting image 5 of vehicle 3"));
   });
 
   test("200 for an external image: skips S3, still deletes the row", async () => {
@@ -175,6 +178,10 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
     expect(res.status).toBe(500);
     expect(res.body.error).toBe("S3 down");
     expect(pool.query).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      "Delete image failed",
+      expect.objectContaining({ imageId: "5", vehicleId: "3", error: "S3 down" })
+    );
   });
 });
 

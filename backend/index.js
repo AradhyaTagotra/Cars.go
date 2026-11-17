@@ -122,7 +122,7 @@ app.get("/api/vehicles/:id", async (req, res) => {
       images: imagesResult.rows
     });
   } catch (err) {
-    console.error(err);
+    logger.error("Get vehicle failed", { vehicleId: req.params.id, error: err.message });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -136,7 +136,7 @@ app.post("/api/login", async (req, res) => {
       [email]
     );
     if (result.rows.length === 0) {
-      console.warn("Login failed: unknown email");
+      logger.warn("Login failed: unknown email");
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
@@ -144,7 +144,7 @@ app.post("/api/login", async (req, res) => {
     const passwordMatches = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordMatches) {
-      console.warn(`Login failed: wrong password for user id ${user.id}`);
+     logger.warn(`Login failed: wrong password for user id ${user.id}`);
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
@@ -246,7 +246,6 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
     res.json({message: "Image uploaded successfully", image:result.rows[0]});
   }
   catch(err){
-    console.error(err);
     logger.error("Upload image failed", { vehicleId: id, error: err.message });
     res.status(500).json({error: err.message});
   }
@@ -254,7 +253,7 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
 
 app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
    if(!isAdminRole(req.user.role)){
-    console.warn(`Delete image refused: ${req.user.email} has role ${req.user.role}`);
+    logger.warn(`Delete image refused: ${req.user.email} has role ${req.user.role}`);
     return res.status(403).json({error: "Only admin can delete images"});
    }
 
@@ -269,7 +268,7 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
       return res.status(404).json({error: "Image not found"});
       
     }
-    console.info(`Deleting image ${imageId} of vehicle ${id} by ${req.user.email}`);
+    logger.info(`Deleting image ${imageId} of vehicle ${id} by ${req.user.email}`);
         const key = getS3Key(found.rows[0].imagepath, process.env.AWS_S3_BUCKET, process.env.AWS_REGION);
 
     // only delete from S3 if the file lives in our bucket
@@ -282,8 +281,7 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
     await pool.query("DELETE FROM vehicle_images WHERE id  = $1" , [imageId]);
     res.json({message: "Image deleted successfully"});
    }catch (err){
-    console.error(err);
-    console.error("Delete image failed:", { imageId, vehicleId: id, error: err.message });
+    logger.error("Delete image failed", { imageId, vehicleId: id, error: err.message });
     res.status(500).json({error: err.message});
    }
 });
@@ -392,7 +390,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 if(require.main === module){
   app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
  });
 }
 
