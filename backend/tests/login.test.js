@@ -2,12 +2,14 @@ process.env.JWT_SECRET = "test-secret";
 
 jest.mock("../db", () => ({ query: jest.fn() }));
 jest.mock("bcrypt", () => ({ compare: jest.fn(), hash: jest.fn() }));
+jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const pool = require("../db");
 const app = require("../index");
+const logger = require("../logger");
 
 const user = { id: 7, email: "admin@example.com", password_hash: "hashed", role: "admin" };
 
@@ -19,6 +21,7 @@ beforeAll(() => {
 beforeEach(() => {
   pool.query.mockReset();
   bcrypt.compare.mockReset();
+  logger.warn.mockClear();
 });
 
 describe("POST /api/login", () => {
@@ -30,6 +33,7 @@ describe("POST /api/login", () => {
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Invalid email or password");
     expect(bcrypt.compare).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith("Login failed: unknown email");
   });
 
   test("401 when the password is wrong", async () => {
@@ -40,6 +44,7 @@ describe("POST /api/login", () => {
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Invalid email or password");
+    expect(logger.warn).toHaveBeenCalledWith("Login failed: wrong password for user id 7");
   });
 
   test("200 with a valid token when the password is right", async () => {

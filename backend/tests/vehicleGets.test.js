@@ -1,8 +1,11 @@
 jest.mock("../db", () => ({ query: jest.fn() }));
+jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 
 const request = require("supertest");
 const pool = require("../db");
 const app = require("../index");
+const logger = require("../logger");
+
 
 beforeAll(() => {
   jest.spyOn(console, "error").mockImplementation(() => {});
@@ -10,6 +13,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   pool.query.mockReset();
+  logger.error.mockClear();
 });
 
 describe("GET /api/vehicles", () => {
@@ -81,5 +85,9 @@ describe("GET /api/vehicles/:id",() => {
         
         expect(res.status).toBe(500);
         expect(res.body.error).toBe("Server error");
+        expect(logger.error).toHaveBeenCalledWith(
+         "Get vehicle failed",
+         expect.objectContaining({ vehicleId: "1", error: "secret db detail" })
+        );
     });
 });
