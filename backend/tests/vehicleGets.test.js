@@ -1,5 +1,6 @@
 jest.mock("../db", () => ({ query: jest.fn() }));
 jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
+jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() }));
 
 const request = require("supertest");
 const pool = require("../db");
