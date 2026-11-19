@@ -1,5 +1,6 @@
 const path = require("path");
 const { createLogger, format, transports } = require("winston");
+const DailyRotateFile = require("winston-daily-rotate-file");
 
 const isTest = process.env.NODE_ENV === "test";
 
@@ -17,8 +18,23 @@ const logger = createLogger({
     ? [new transports.Console({ silent: true })]
     : [
         new transports.Console(),
-        new transports.File({ filename: path.join(__dirname, "logs", "error.log"), level: "error" }),
-        new transports.File({ filename: path.join(__dirname, "logs", "combined.log") }),
+                new DailyRotateFile({
+          filename: path.join(__dirname, "logs", "combined-%DATE%.log"),
+          datePattern: "YYYY-MM-DD",
+          utc: true,
+          maxSize: "20m",
+          maxFiles: "14d",
+          zippedArchive: true,
+        }),
+        new DailyRotateFile({
+          filename: path.join(__dirname, "logs", "error-%DATE%.log"),
+          level: "error",
+          datePattern: "YYYY-MM-DD",
+          utc: true,
+          maxSize: "20m",
+          maxFiles: "30d",
+          zippedArchive: true,
+        }),
       ],
 });
 
