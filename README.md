@@ -19,7 +19,7 @@ A full-stack web application for browsing and searching car listings, with a sec
 |---|---|
 | Frontend | React (Vite), React Router |
 | Backend | Node.js, Express (REST API) |
-| Database | PostgreSQL, hosted on Neon |
+| Database | PostgreSQL (cloud-hosted) |
 | File storage | AWS S3 |
 | Authentication | JWT, bcrypt password hashing |
 | Logging | Morgan (requests), Winston (application logs) |
