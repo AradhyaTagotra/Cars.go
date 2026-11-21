@@ -15,6 +15,7 @@ jest.mock("@aws-sdk/lib-storage", () => ({
   Upload: jest.fn().mockImplementation(() => ({ done: mockUploadDone })),
 }));
 jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
+jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() }));
 
 const request = require("supertest");
 const jwt = require("jsonwebtoken");

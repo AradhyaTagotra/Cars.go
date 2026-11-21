@@ -3,6 +3,7 @@ process.env.JWT_SECRET = "test-secret";
 jest.mock("../db", () => ({ query: jest.fn() }));
 jest.mock("bcrypt", () => ({ compare: jest.fn(), hash: jest.fn() }));
 jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
+jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() }));
 
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
@@ -67,5 +68,13 @@ describe("POST /api/login", () => {
 
     expect(res.status).toBe(500);
     expect(res.body.error).toBe("db down");
+  });
+    test("each request is written to the logger at http level", async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+
+    await request(app).post("/api/login").send({ email: "x@example.com", password: "x" });
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(logger.http).toHaveBeenCalledWith(expect.stringMatching(/^POST \/api\/login 401 /));
   });
 });
