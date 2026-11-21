@@ -12,7 +12,7 @@ function CarDetailsPage() {
   const isAdmin = role === "root" || role === "admin";
 
   const loadCar = () => {
-    fetch(`/api/vehicles`)
+    fetch(`/api/v1/vehicles`)
       .then(res => res.json())
       .then(data => {
         const found = data.find(c => c.id === Number(id));
@@ -35,7 +35,7 @@ function CarDetailsPage() {
     setMessage("");
 
     try{
-      const res = await fetch(`/api/vehicles/${id}/image`, {
+      const res = await fetch(`/api/v1/vehicles/${id}/image`, {
         method: "POST",
         headers: {Authorization : `Bearer ${localStorage.getItem("token")}`},
         body: formData,

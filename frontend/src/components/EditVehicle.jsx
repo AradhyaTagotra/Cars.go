@@ -9,12 +9,12 @@ function EditVehicle() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`/api/vehicles/${id}`)
+    fetch(`/api/v1/vehicles/${id}`)
       .then((res) => res.json())
       .then((data) => setFormData(data))
       .catch(() => setError("Failed to load vehicle"));
 
-    fetch("/api/lookups")
+    fetch("/api/v1/lookups")
       .then((res) => res.json())
       .then((data) => setLookups(data))
       .catch(() => setError("Failed to load form options"));
@@ -53,7 +53,7 @@ function EditVehicle() {
     };
 
     try {
-      const res = await fetch(`/api/vehicles/${id}`, {
+      const res = await fetch(`/api/v1/vehicles/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

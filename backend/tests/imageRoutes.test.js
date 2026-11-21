@@ -47,13 +47,13 @@ beforeEach(() => {
 
 describe("POST /api/vehicles/:id/image", () => {
   test("401 without a token", async () => {
-    const res = await request(app).post("/api/vehicles/3/image");
+    const res = await request(app).post("/api/v1/vehicles/3/image");
     expect(res.status).toBe(401);
   });
 
   test("403 for a normal user", async () => {
     const res = await request(app)
-      .post("/api/vehicles/3/image")
+      .post("/api/v1/vehicles/3/image")
       .set("Authorization", `Bearer ${tokenFor("user")}`)
       .attach("image", Buffer.from("fake"), "car.jpg");
     expect(res.status).toBe(403);
@@ -63,7 +63,7 @@ describe("POST /api/vehicles/:id/image", () => {
 
   test("400 when no file is sent", async () => {
     const res = await request(app)
-      .post("/api/vehicles/3/image")
+      .post("/api/v1/vehicles/3/image")
       .set("Authorization", `Bearer ${tokenFor("admin")}`);
     expect(res.status).toBe(400);
     expect(res.body.error).toBe("No image file provided");
@@ -75,7 +75,7 @@ describe("POST /api/vehicles/:id/image", () => {
     });
 
     const res = await request(app)
-      .post("/api/vehicles/3/image")
+      .post("/api/v1/vehicles/3/image")
       .set("Authorization", `Bearer ${tokenFor("admin")}`)
       .attach("image", Buffer.from("fake"), "car.jpg");
 
@@ -92,13 +92,13 @@ describe("POST /api/vehicles/:id/image", () => {
 
 describe("DELETE /api/vehicles/:id/image/:imageId", () => {
   test("401 without a token", async () => {
-    const res = await request(app).delete("/api/vehicles/3/image/5");
+    const res = await request(app).delete("/api/v1/vehicles/3/image/5");
     expect(res.status).toBe(401);
   });
 
   test("403 for a normal user", async () => {
     const res = await request(app)
-      .delete("/api/vehicles/3/image/5")
+      .delete("/api/v1/vehicles/3/image/5")
       .set("Authorization", `Bearer ${tokenFor("user")}`);
     expect(res.status).toBe(403);
     expect(pool.query).not.toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
 
     const res = await request(app)
-      .delete("/api/vehicles/3/image/5")
+      .delete("/api/v1/vehicles/3/image/5")
       .set("Authorization", `Bearer ${tokenFor("admin")}`);
 
     expect(res.status).toBe(404);
@@ -123,7 +123,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
       .mockResolvedValueOnce({});
 
     const res = await request(app)
-      .delete("/api/vehicles/3/image/5")
+      .delete("/api/v1/vehicles/3/image/5")
       .set("Authorization", `Bearer ${tokenFor("admin")}`);
 
     expect(res.status).toBe(200);
@@ -143,7 +143,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
       .mockResolvedValueOnce({});
 
     const res = await request(app)
-      .delete("/api/vehicles/3/image/4")
+      .delete("/api/v1/vehicles/3/image/4")
       .set("Authorization", `Bearer ${tokenFor("root")}`);
 
     expect(res.status).toBe(200);
@@ -155,7 +155,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
     mockUploadDone.mockRejectedValueOnce(new Error("S3 down"));
 
     const res = await request(app)
-      .post("/api/vehicles/3/image")
+      .post("/api/v1/vehicles/3/image")
       .set("Authorization", `Bearer ${tokenFor("admin")}`)
       .attach("image", Buffer.from("fake"), "car.jpg");
 
@@ -173,7 +173,7 @@ describe("DELETE /api/vehicles/:id/image/:imageId", () => {
     mockSend.mockRejectedValueOnce(new Error("S3 down"));
 
     const res = await request(app)
-      .delete("/api/vehicles/3/image/5")
+      .delete("/api/v1/vehicles/3/image/5")
       .set("Authorization", `Bearer ${tokenFor("admin")}`);
 
     expect(res.status).toBe(500);
