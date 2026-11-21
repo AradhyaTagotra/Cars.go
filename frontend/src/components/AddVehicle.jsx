@@ -22,7 +22,7 @@ function AddVehicle() {
     });
 
     useEffect(() => {
-        fetch("/api/lookups")
+        fetch("/api/v1/lookups")
             .then((res) => res.json())
             .then((data) => setLookups(data))
             .catch(() => setError("Failed to load form options"));
@@ -61,7 +61,7 @@ function AddVehicle() {
 
 
         try {
-            const res = await fetch("/api/vehicles", {
+            const res = await fetch("/api/v1/vehicles", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

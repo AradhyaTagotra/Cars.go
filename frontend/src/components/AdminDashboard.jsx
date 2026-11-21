@@ -12,7 +12,7 @@ function AdminDashboard() {
             navigate("/admin/login");
             return;
         }
-        fetch("/api/vehicles")
+        fetch("/api/v1/vehicles")
             .then((res) => res.json())
             .then((data) => setVehicles(data))
             .catch(() => setError("Failed to load vehicles"));
@@ -25,7 +25,7 @@ function AdminDashboard() {
         const token = localStorage.getItem("token");
 
         try {
-            const res = await fetch(`/api/vehicles/${id}`, {
+            const res = await fetch(`/api/v1/vehicles/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });

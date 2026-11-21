@@ -12,7 +12,7 @@ function ImageGallery({images, vehicleId, isAdmin, onChange}) {
         const imageId = images[current].id;
 
         try{
-            const res = await fetch(`/api/vehicles/${vehicleId}/image/${imageId}`, {
+            const res = await fetch(`/api/v1/vehicles/${vehicleId}/image/${imageId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}`},
             });

@@ -22,13 +22,13 @@ beforeEach(() => {
 
 describe("POST /api/admin/create-admin", () => {
     test("401 without a token" ,async () =>{
-        const res =await request(app).post("/api/admin/create-admin").send(newAdmin);
+        const res =await request(app).post("/api/v1/admin/create-admin").send(newAdmin);
         expect(res.status).toBe(401);
     });
 
     test("403 for an admin: Only root may create admins" ,async () =>{
         const res =await request(app)
-        .post("/api/admin/create-admin")
+        .post("/api/v1/admin/create-admin")
         .set("Authorization", `Bearer ${tokenFor("admin")}`)
         .send(newAdmin);
 
@@ -40,7 +40,7 @@ describe("POST /api/admin/create-admin", () => {
 
     test("403 for a normal user" ,async () =>{
         const res =await request(app)
-        .post("/api/admin/create-admin")
+        .post("/api/v1/admin/create-admin")
         .set("Authorization", `Bearer ${tokenFor("user")}`)
         .send(newAdmin);
 
@@ -53,7 +53,7 @@ describe("POST /api/admin/create-admin", () => {
         pool.query.mockResolvedValueOnce({rows:[{id:9, email:newAdmin.email, role: "admin"}]});
 
         const res =await request(app)
-        .post("/api/admin/create-admin")
+        .post("/api/v1/admin/create-admin")
         .set("Authorization", `Bearer ${tokenFor("root")}`)
         .send(newAdmin);
 
@@ -73,7 +73,7 @@ describe("POST /api/admin/create-admin", () => {
         pool.query.mockRejectedValueOnce(new Error("duplicate key"));
 
         const res =await request(app)
-        .post("/api/admin/create-admin")
+        .post("/api/v1/admin/create-admin")
         .set("Authorization", `Bearer ${tokenFor("root")}`)
         .send(newAdmin);
 

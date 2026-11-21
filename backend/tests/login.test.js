@@ -29,7 +29,7 @@ describe("POST /api/login", () => {
   test("401 when the email is unknown", async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
 
-    const res = await request(app).post("/api/login").send({ email: "nobody@example.com", password: "x" });
+    const res = await request(app).post("/api/v1/login").send({ email: "nobody@example.com", password: "x" });
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Invalid email or password");
@@ -41,7 +41,7 @@ describe("POST /api/login", () => {
     pool.query.mockResolvedValueOnce({ rows: [user] });
     bcrypt.compare.mockResolvedValueOnce(false);
 
-    const res = await request(app).post("/api/login").send({ email: user.email, password: "wrong" });
+    const res = await request(app).post("/api/v1/login").send({ email: user.email, password: "wrong" });
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Invalid email or password");
@@ -52,7 +52,7 @@ describe("POST /api/login", () => {
     pool.query.mockResolvedValueOnce({ rows: [user] });
     bcrypt.compare.mockResolvedValueOnce(true);
 
-    const res = await request(app).post("/api/login").send({ email: user.email, password: "right" });
+    const res = await request(app).post("/api/v1/login").send({ email: user.email, password: "right" });
 
     expect(res.status).toBe(200);
     expect(res.body.role).toBe("admin");
@@ -64,7 +64,7 @@ describe("POST /api/login", () => {
   test("500 when the database fails", async () => {
     pool.query.mockRejectedValueOnce(new Error("db down"));
 
-    const res = await request(app).post("/api/login").send({ email: user.email, password: "x" });
+    const res = await request(app).post("/api/v1/login").send({ email: user.email, password: "x" });
 
     expect(res.status).toBe(500);
     expect(res.body.error).toBe("db down");
@@ -72,9 +72,9 @@ describe("POST /api/login", () => {
     test("each request is written to the logger at http level", async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
 
-    await request(app).post("/api/login").send({ email: "x@example.com", password: "x" });
+    await request(app).post("/api/v1/login").send({ email: "x@example.com", password: "x" });
     await new Promise((resolve) => setImmediate(resolve));
 
-    expect(logger.http).toHaveBeenCalledWith(expect.stringMatching(/^POST \/api\/login 401 /));
+    expect(logger.http).toHaveBeenCalledWith(expect.stringMatching(/^POST \/api\/v1\/login 401 /));
   });
 });

@@ -11,14 +11,14 @@ beforeEach(() => {
 describe("GET /api/test-db", () => {
   test("200 returns the database time", async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ now: "2026-11-05T10:00:00Z" }] });
-    const res = await request(app).get("/api/test-db");
+    const res = await request(app).get("/api/v1/test-db");
     expect(res.status).toBe(200);
     expect(res.body).toEqual([{ now: "2026-11-05T10:00:00Z" }]);
   });
 
   test("500 when the database fails", async () => {
     pool.query.mockRejectedValueOnce(new Error("db down"));
-    const res = await request(app).get("/api/test-db");
+    const res = await request(app).get("/api/v1/test-db");
     expect(res.status).toBe(500);
     expect(res.body.error).toBe("db down");
   });
@@ -33,7 +33,7 @@ describe("GET /api/lookups", () => {
       .mockResolvedValueOnce({ rows: [{ id: 1, name: "Petrol" }] })
       .mockResolvedValueOnce({ rows: [{ id: 1, name: "Hatchback" }] });
 
-    const res = await request(app).get("/api/lookups");
+    const res = await request(app).get("/api/v1/lookups");
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -48,8 +48,22 @@ describe("GET /api/lookups", () => {
 
   test("500 when one of the queries fails", async () => {
     pool.query.mockRejectedValueOnce(new Error("db down"));
-    const res = await request(app).get("/api/lookups");
+    const res = await request(app).get("/api/v1/lookups");
     expect(res.status).toBe(500);
     expect(res.body.error).toBe("db down");
+  });
+});
+
+describe("API versioning", () => {
+  test("the versioned path works", async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ now: "t" }] });
+    const res = await request(app).get("/api/v1/test-db");
+    expect(res.status).toBe(200);
+  });
+
+  test("the old unversioned path still works during the transition", async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ now: "t" }] });
+    const res = await request(app).get("/api/test-db");
+    expect(res.status).toBe(200);
   });
 });

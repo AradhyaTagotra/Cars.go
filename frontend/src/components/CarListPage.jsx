@@ -16,7 +16,7 @@ function CarListPage() {
   });
 
   useEffect ( () => {
-    fetch(`/api/vehicles`)
+    fetch(`/api/v1/vehicles`)
     .then(res => res.json())
     .then(data => setCars(data))
     .catch(err => console.error("Failed to fetch vehicles:", err));

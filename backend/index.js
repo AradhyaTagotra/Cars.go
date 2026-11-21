@@ -28,8 +28,9 @@ const s3 = new S3Client({
 });
 
 const upload = multer({ storage: multer.memoryStorage() });
+const api = express.Router();
 
-app.get("/api/test-db", async (req, res) => {
+api.get("/test-db", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
     res.json(result.rows);
@@ -39,7 +40,7 @@ app.get("/api/test-db", async (req, res) => {
   }
 });
 
-app.get("/api/vehicles", async (req, res) => {
+api.get("/vehicles", async (req, res) => {
   try {
     const vehiclesResult = await pool.query(`
       SELECT
@@ -76,7 +77,7 @@ app.get("/api/vehicles", async (req, res) => {
   }
 });
 
-app.get("/api/vehicles/:id", async (req, res) => {
+api.get("/vehicles/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -129,7 +130,7 @@ app.get("/api/vehicles/:id", async (req, res) => {
   }
 });
 
-app.post("/api/login", async (req, res) => {
+api.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -165,7 +166,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.post("/api/admin/create-admin", verifyToken, async (req, res) => {
+api.post("/admin/create-admin", verifyToken, async (req, res) => {
   if (req.user.role !== "root") {
     return res.status(403).json({ error: "Only the root user can create admin accounts" });
   }
@@ -186,7 +187,7 @@ app.post("/api/admin/create-admin", verifyToken, async (req, res) => {
   }
 });
 
-app.post("/api/vehicles", verifyToken, async (req, res) => {
+api.post("/vehicles", verifyToken, async (req, res) => {
   if (req.user.role !== "root" && req.user.role !== "admin") {
     return res.status(403).json({ error: "Only admin can add listings" });
   }
@@ -215,7 +216,7 @@ app.post("/api/vehicles", verifyToken, async (req, res) => {
   }
 });
 
-app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (req,res) => {
+api.post("/vehicles/:id/image", verifyToken, upload.single("image"), async (req,res) => {
   if(!isAdminRole(req.user.role)){
     return res.status(403).json({error: "Only admin can upload images"});
   }
@@ -253,7 +254,7 @@ app.post("/api/vehicles/:id/image", verifyToken, upload.single("image"), async (
   }
 });
 
-app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
+api.delete("/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
    if(!isAdminRole(req.user.role)){
     logger.warn(`Delete image refused: ${req.user.email} has role ${req.user.role}`);
     return res.status(403).json({error: "Only admin can delete images"});
@@ -288,7 +289,7 @@ app.delete("/api/vehicles/:id/image/:imageId", verifyToken, async (req, res) =>{
    }
 });
 
-app.put("/api/vehicles/:id", verifyToken, async (req, res) => {
+api.put("/vehicles/:id", verifyToken, async (req, res) => {
   if (req.user.role !== "root" && req.user.role !== "admin") {
     return res.status(403).json({ error: "Only admin can edit listings" });
   }
@@ -320,7 +321,7 @@ app.put("/api/vehicles/:id", verifyToken, async (req, res) => {
   }
 });
 
-app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
+api.delete("/vehicles/:id", verifyToken, async (req, res) => {
   if (req.user.role !== "root" && req.user.role !== "admin") {
     
     return res.status(403).json({ error: "Only admins can delete listings" });
@@ -362,7 +363,7 @@ app.delete("/api/vehicles/:id", verifyToken, async (req, res) => {
   }
 });
 
-app.get("/api/lookups", async (req, res) => {
+api.get("/lookups", async (req, res) => {
   try {
     const [makes, statuses, gearboxTypes, fuelTypes, bodyTypes] = await Promise.all([
       pool.query("SELECT id, name FROM make ORDER BY name"),
@@ -384,6 +385,9 @@ app.get("/api/lookups", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.use("/api/v1", api);
+app.use("/api", api); 
 
 app.get("/", (req, res) => {
   res.send("Carslist backend is running");
