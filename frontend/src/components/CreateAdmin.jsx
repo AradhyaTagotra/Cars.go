@@ -33,7 +33,7 @@ function CreateAdmin() {
         const token = localStorage.getItem("token");
 
         try {
-            const res = await fetch("/api/admin/create-admin", {
+            const res = await fetch("/api/v1/admin/create-admin", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

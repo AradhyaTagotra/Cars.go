@@ -41,13 +41,13 @@ beforeEach(() => {
 
 describe("POST /api/vehicles", () => {
     test("401 without a token", async () => {
-        const res = await request(app).post("/api/vehicles").send(vehicle);
+        const res = await request(app).post("/api/v1/vehicles").send(vehicle);
         expect(res.status).toBe(401);
     });
 
     test("403 for a normal user", async () => {
         const res = await request(app)
-        .post("/api/vehicles")
+        .post("/api/v1/vehicles")
         .set(auth("user"))
         .send(vehicle);
         expect(res.status).toBe(403);
@@ -59,7 +59,7 @@ describe("POST /api/vehicles", () => {
         pool.query.mockResolvedValueOnce({rows:[{id:7, ...vehicle}]});
 
         const res = await request(app)
-        .post("/api/vehicles")
+        .post("/api/v1/vehicles")
         .set(auth(role))
         .send(vehicle);
         expect(res.status).toBe(200);
@@ -78,7 +78,7 @@ describe("POST /api/vehicles", () => {
     test("500 when the database fails", async () => {
         pool.query.mockRejectedValueOnce(new Error("db down"));
         const res = await request(app)
-        .post("/api/vehicles")
+        .post("/api/v1/vehicles")
         .set(auth("admin"))
         .send(vehicle);
         expect(res.status).toBe(500);
@@ -87,13 +87,13 @@ describe("POST /api/vehicles", () => {
 });
 describe("PUT /api/vehicles/:id", () => {
     test("401 without a token", async () => {
-        const res = await request(app).put("/api/vehicles/7").send(vehicle);
+        const res = await request(app).put("/api/v1/vehicles/7").send(vehicle);
         expect(res.status).toBe(401);
     });
 
     test("403 for a normal user", async () => {
         const res = await request(app)
-        .put("/api/vehicles/7")
+        .put("/api/v1/vehicles/7")
         .set(auth("user"))
         .send(vehicle);
         expect(res.status).toBe(403);
@@ -104,7 +104,7 @@ describe("PUT /api/vehicles/:id", () => {
     test("404 when the vehicle does not exist", async () => {
         pool.query.mockResolvedValueOnce({rows:[]});
         const res = await request(app)
-        .put("/api/vehicles/999")
+        .put("/api/v1/vehicles/999")
         .set(auth("admin"))
         .send(vehicle);
         expect(res.status).toBe(404);
@@ -115,7 +115,7 @@ describe("PUT /api/vehicles/:id", () => {
         pool.query.mockResolvedValueOnce({rows:[{id:7, ...vehicle}]});
 
         const res = await request(app)
-        .put("/api/vehicles/7")
+        .put("/api/v1/vehicles/7")
         .set(auth(role))
         .send(vehicle);
         expect(res.status).toBe(200);
@@ -132,7 +132,7 @@ describe("PUT /api/vehicles/:id", () => {
     test("500 when the database fails", async () => {
         pool.query.mockRejectedValueOnce(new Error("db down"));
         const res = await request(app)
-        .put("/api/vehicles/7")
+        .put("/api/v1/vehicles/7")
         .set(auth("admin"))
         .send(vehicle);
         expect(res.status).toBe(500);
@@ -141,12 +141,12 @@ describe("PUT /api/vehicles/:id", () => {
 
 describe("DELETE /api/vehicles/:id", () => {
   test("401 without a token", async () => {
-    const res = await request(app).delete("/api/vehicles/7");
+    const res = await request(app).delete("/api/v1/vehicles/7");
     expect(res.status).toBe(401);
   });
 
   test("403 for a normal user", async () => {
-    const res = await request(app).delete("/api/vehicles/7").set(auth("user"));
+    const res = await request(app).delete("/api/v1/vehicles/7").set(auth("user"));
     expect(res.status).toBe(403);
     expect(res.body.error).toBe("Only admins can delete listings");
     expect(pool.query).not.toHaveBeenCalled();
@@ -158,7 +158,7 @@ describe("DELETE /api/vehicles/:id", () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce({ rows: [] });
-    const res = await request(app).delete("/api/vehicles/999").set(auth("admin"));
+    const res = await request(app).delete("/api/v1/vehicles/999").set(auth("admin"));
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Vehicle not found");
   });
@@ -169,7 +169,7 @@ describe("DELETE /api/vehicles/:id", () => {
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce({ rows: [{ id: 7 }] });
 
-    const res = await request(app).delete("/api/vehicles/7").set(auth(role));
+    const res = await request(app).delete("/api/v1/vehicles/7").set(auth(role));
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Vehicle deleted successfully");
@@ -185,7 +185,7 @@ describe("DELETE /api/vehicles/:id", () => {
     pool.query.mockResolvedValueOnce({ rows: [{ imagepath: `${BASE}vehicles/7/1-a.jpg` }] });
     mockSend.mockRejectedValueOnce(new Error("S3 down"));
 
-    const res = await request(app).delete("/api/vehicles/7").set(auth("admin"));
+    const res = await request(app).delete("/api/v1/vehicles/7").set(auth("admin"));
 
     expect(res.status).toBe(500);
     expect(pool.query).toHaveBeenCalledTimes(1);
@@ -193,7 +193,7 @@ describe("DELETE /api/vehicles/:id", () => {
 
   test("500 when the database fails", async () => {
     pool.query.mockRejectedValueOnce(new Error("db down"));
-    const res = await request(app).delete("/api/vehicles/7").set(auth("admin"));
+    const res = await request(app).delete("/api/v1/vehicles/7").set(auth("admin"));
     expect(res.status).toBe(500);
   });
 });
