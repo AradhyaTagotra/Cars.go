@@ -74,7 +74,7 @@ function AddVehicle() {
                 return;
             }
             navigate("/admin/dashboard");
-        } catch (err) {
+        } catch {
             setError("Something went rong while creating the vehicle");
         }
     };

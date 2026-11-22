@@ -35,7 +35,7 @@ function AdminDashboard() {
             }
             setVehicles(vehicles.filter((v) => v.id !== id));
         }
-        catch (err) {
+        catch {
             setError("Something went wrong while deleting");
         }
     };

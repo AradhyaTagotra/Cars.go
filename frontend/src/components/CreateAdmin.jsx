@@ -52,7 +52,7 @@ function CreateAdmin() {
             setMessage(`Admin created: ${data.user.email}`);
             setEmail("");
             setPassword("");
-        } catch (err) {
+        } catch {
             setError("Something went wrong while creating the admin");
         } finally {
             setLoading(false);

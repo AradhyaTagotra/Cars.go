@@ -68,7 +68,7 @@ function EditVehicle() {
       }
 
       navigate("/admin/dashboard");
-    } catch (err) {
+    } catch {
       setError("Something went wrong while updating");
     }
   };
