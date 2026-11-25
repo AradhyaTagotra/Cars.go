@@ -9,7 +9,7 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const pool = require("../db");
-const app = require("../index");
+const app = require("../app");
 const logger = require("../logger");
 
 const user = { id: 7, email: "admin@example.com", password_hash: "hashed", role: "admin" };

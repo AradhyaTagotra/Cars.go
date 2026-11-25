@@ -14,7 +14,7 @@ jest.mock("../db",() =>({query:jest.fn()}));
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
-const app = require("../index");
+const app = require("../app");
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const BASE = "https://test-bucket.s3.eu-north-1.amazonaws.com/";
 

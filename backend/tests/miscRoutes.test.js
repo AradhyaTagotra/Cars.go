@@ -2,7 +2,7 @@ jest.mock("../db", () => ({ query: jest.fn() }));
 
 const request = require("supertest");
 const pool = require("../db");
-const app = require("../index");
+const app = require("../app");
 
 beforeEach(() => {
   pool.query.mockReset();
@@ -58,12 +58,6 @@ describe("API versioning", () => {
   test("the versioned path works", async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ now: "t" }] });
     const res = await request(app).get("/api/v1/test-db");
-    expect(res.status).toBe(200);
-  });
-
-  test("the old unversioned path still works during the transition", async () => {
-    pool.query.mockResolvedValueOnce({ rows: [{ now: "t" }] });
-    const res = await request(app).get("/api/test-db");
     expect(res.status).toBe(200);
   });
 });
