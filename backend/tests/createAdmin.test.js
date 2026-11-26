@@ -7,7 +7,7 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const pool = require("../db");
-const app = require("../index");
+const app = require("../app");
 
 const tokenFor = (role) => 
     jwt.sign({id: 1, role, email:"test-user@example"}, "test-secret", {expiresIn:"1h"});

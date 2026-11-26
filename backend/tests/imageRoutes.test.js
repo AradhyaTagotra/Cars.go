@@ -21,7 +21,7 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const app = require("../index");
+const app = require("../app");
 const logger = require("../logger");
 
 const tokenFor = (role) =>

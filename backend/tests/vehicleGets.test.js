@@ -4,7 +4,7 @@ jest.mock("../logger", () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn
 
 const request = require("supertest");
 const pool = require("../db");
-const app = require("../index");
+const app = require("../app");
 const logger = require("../logger");
 
 
